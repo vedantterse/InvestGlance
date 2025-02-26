@@ -1,0 +1,250 @@
+/* Modern Dashboard Styling with Purple Theme */
+
+/* Reset any conflicting styles */
+.dashboard-header, .modern-header, .company-name, .detail-badge, .badges,
+.badge, .tab-container, .content-card, .company-details {
+    display: none !important;
+}
+
+/* Remove space above dashboard header */
+.main .block-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.main .block-container > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Modern Dashboard Header */
+.modern-dashboard-header {
+    background: linear-gradient(135deg, #13131f 0%, #1e1e3a 100%);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(147, 112, 219, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gradient top border */
+.modern-dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #9370DB, #48D1CC);
+}
+
+/* Badge container - moved to top */
+.badge-container {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+}
+
+/* Enhanced Badge styling */
+.stock-badge {
+    background: rgba(20, 20, 35, 0.5);
+    padding: 0.7rem 1.2rem;
+    border-radius: 12px;
+    min-width: 120px;
+    border: 1px solid rgba(147, 112, 219, 0.3);
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+    transform: perspective(500px) rotateX(5deg);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Badge content layout */
+.badge-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Badge value text */
+.badge-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(147, 112, 219, 0.3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Purple glow badge */
+.purple-glow {
+    background: linear-gradient(135deg, rgba(50, 20, 80, 0.6), rgba(75, 20, 120, 0.4));
+    border-left: 3px solid #9370DB;
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.3);
+}
+
+/* Cyan glow badge */
+.cyan-glow {
+    background: linear-gradient(135deg, rgba(20, 60, 80, 0.6), rgba(20, 80, 100, 0.4));
+    border-left: 3px solid #48D1CC;
+    box-shadow: 0 0 15px rgba(72, 209, 204, 0.3);
+}
+
+/* Company name with gradient - moved below badges */
+.gradient-header {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 10%, #dcd0ff 80%, #9370DB 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+/* Tab Button Styling - Purple Theme - ONLY for main dashboard tabs, not sidebar */
+/* Using a more targeted selector to avoid affecting sidebar buttons */
+.main .element-container [data-testid="stButton"] button {
+    background: linear-gradient(145deg, #1a1a2c, #232340) !important;
+    border: 1px solid rgba(147, 112, 219, 0.2) !important;
+    border-radius: 12px !important;
+    padding: 0.6rem !important;
+    height: auto !important;
+    min-height: 65px !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.3rem !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: #e0e0e0 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Tab button hover effect - only for main content tabs */
+.main .element-container [data-testid="stButton"] button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(147, 112, 219, 0.25) !important;
+    border-color: rgba(147, 112, 219, 0.4) !important;
+}
+
+/* Active tab styling - Purple theme - ONLY for main dashboard tabs */
+.main .element-container [data-testid="stButton"] button[kind="secondary"] {
+    background: linear-gradient(145deg, #2a1a4a, #351d5e) !important;
+    border: 2px solid #9370DB !important;
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.3) !important;
+    color: #ffffff !important;
+}
+
+/* Extremely specific selector to override any other styling */
+div.element-container div.stButton button[kind="secondary"] {
+    background: linear-gradient(145deg, #2a1a4a, #351d5e) !important;
+    border: 2px solid #9370DB !important;
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.3) !important;
+    color: #ffffff !important;
+}
+
+/* Content section styling */
+.content-section {
+    background: linear-gradient(145deg, #1a1a2a, #22222f);
+    border-radius: 14px;
+    padding: 1.8rem;
+    border: 1px solid rgba(147, 112, 219, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Info message styling with purple theme */
+.stInfo {
+    background: rgba(147, 112, 219, 0.08) !important;
+    border: 1px solid rgba(147, 112, 219, 0.15) !important;
+    padding: 1.2rem !important;
+    border-radius: 10px !important;
+    color: #e0e0e0 !important;
+    font-family: 'Inter', sans-serif !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Purple left border for info message */
+.stInfo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, #9370DB, #48D1CC);
+}
+
+/* Make sure sidebar buttons NEVER use purple styling */
+.stSidebar [data-testid="stButton"] button {
+    background: linear-gradient(145deg, #1e1e1e, #252525) !important;
+    border: 1px solid #333 !important;
+    border-radius: 12px !important;
+    color: #e0e0e0 !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+}
+
+/* Ensure selected state for sidebar buttons is red */
+.stSidebar [data-testid="stButton"] button[kind="secondary"] {
+    border-left: 4px solid #ff4b4b !important;
+    background: linear-gradient(145deg, #252525, #1e1e1e) !important;
+    box-shadow: 0 0 15px rgba(255, 75, 75, 0.15) !important;
+    border-color: #555 !important;
+}
+
+.stSidebar [data-testid="stButton"] button:hover {
+    transform: translateY(-2px) !important;
+    border-color: #555 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+.stSidebar [data-testid="stButton"] button[kind="secondary"]:hover {
+    border-left: 4px solid #ff6b6b !important;
+    box-shadow: 0 4px 12px rgba(255, 75, 75, 0.2) !important;
+}
+
+/* Make sure market selector buttons in sidebar use red styling */
+.stSidebar button[data-testid="baseButton-secondary"] {
+    border-color: #ff4b4b !important;
+    background: linear-gradient(135deg, #2a1f1f, #2d2d2d) !important;
+    box-shadow: 0 0 10px rgba(255, 75, 75, 0.15) !important;
+}
+
+.stSidebar button[data-testid="baseButton-secondary"]:hover {
+    border-color: #ff6b6b !important;
+    background: linear-gradient(135deg, #2d1f1f, #2d2d2d) !important;
+    box-shadow: 0 4px 12px rgba(255, 75, 75, 0.2) !important;
+}
+
+/* Additional specific override for tab buttons */
+button[data-testid="baseButton-secondary"]:not(.stSidebar button) {
+    background: linear-gradient(145deg, #2a1a4a, #351d5e) !important;
+    border: 2px solid #9370DB !important;
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.3) !important;
+    color: #ffffff !important;
+}
+
+/* Merged from override.css */
+/* Override styles to ensure purple tab styling */
+.st-emotion-cache-1kyxreq [data-testid="stButton"] button[kind="secondary"] {
+    background: linear-gradient(145deg, #2a1a4a, #351d5e) !important;
+    border: 2px solid #9370DB !important;
+    box-shadow: 0 0 20px rgba(147, 112, 219, 0.3) !important;
+    color: #ffffff !important;
+}
+
+.st-emotion-cache-1kyxreq [data-testid="stButton"] button[kind="primary"] {
+    background: linear-gradient(145deg, #1a1a2c, #232340) !important;
+    border: 1px solid rgba(147, 112, 219, 0.2) !important;
+    color: #e0e0e0 !important;
+}
