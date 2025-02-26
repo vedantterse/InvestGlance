@@ -96,81 +96,25 @@ with open('assets/styles.css') as f:
 with open('assets/dashboard.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Remove whitespace from the top of the page and sidebar
+# Add JavaScript for button styling
 st.markdown("""
-    <style>
-        .block-container {
-            padding-top: 0rem;
-            padding-bottom: 0rem;
-            padding-left: 0rem;
-            padding-right: 0rem;
-        }
-        [data-testid="stSidebar"] [data-testid="stSidebarNav"] {
-            padding-top: 0rem;
-        }
-        .main > div {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        [data-testid="stSidebarNav"] {
-            padding-top: 0rem;
-        }
-        [data-testid="collapsedControl"] {
-            display: none
-        }
-        #MainMenu {display: none;}
-        footer {display: none;}
-        /* Reduce gap between sidebar and main content */
-        [data-testid="stSidebarContent"] {
-            gap: 0rem;
-        }
-        /* Price display styles */
-        .modern-dashboard-header {
-            position: relative;
-        }
-        .price-display {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 2.5rem;
-            font-weight: 700;
-            font-family: 'Poppins', sans-serif;
-            text-align: right;
-        }
-        .price-label {
-            font-size: 1rem;
-            opacity: 0.7;
-            display: block;
-            font-weight: 400;
-        }
-        .trend-up {
-            color: #4CAF50; /* Green for uptrend */
-        }
-        .trend-down {
-            color: #F44336; /* Red for downtrend */
-        }
-        .trend-neutral {
-            color: #FFC107; /* Amber for neutral/no trend */
-        }
-        /* Compact tab button styles */
-        [data-testid="stHorizontalBlock"] {
-            gap: 0.5rem !important;
-        }
-        .compact-tab-button {
-            padding: 0.3rem !important;
-            min-height: 0 !important;
-            height: auto !important;
-            line-height: 1.2 !important;
-            font-size: 0.9rem !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-        /* Style for the button container */
-        .tab-button-container {
-            padding: 0rem 0.25rem !important;
-        }
-    </style>
+<script>
+    // Use mutation observer to apply styles to buttons after they're rendered
+    const observer = new MutationObserver(() => {
+        const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
+        buttons.forEach(button => {
+            button.classList.add('compact-tab-button');
+        });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Also apply immediately in case elements already exist
+    const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
+    buttons.forEach(button => {
+        button.classList.add('compact-tab-button');
+    });
+</script>
 """, unsafe_allow_html=True)
 
 # Sidebar header
@@ -241,11 +185,7 @@ def display_stocks(data, search_query):
         filtered_data = data[mask].copy()
     
     if len(filtered_data) == 0:
-        st.sidebar.markdown("""
-            <div style='text-align: center; padding: 20px; color: #808080; font-family: Inter, sans-serif;'>
-                No stocks found matching your search criteria.
-            </div>
-        """, unsafe_allow_html=True)
+        st.sidebar.markdown('<div class="no-results-message">No stocks found matching your search criteria.</div>', unsafe_allow_html=True)
         return
     
     # Display each matching stock
@@ -370,28 +310,6 @@ if selected_stock:
                     st.session_state.selected_tab = "News"
                     st.rerun()
             
-            # Add JavaScript to adjust button styles after rendering
-            st.markdown("""
-            <script>
-                // Use mutation observer to apply styles to buttons after they're rendered
-                const observer = new MutationObserver(() => {
-                    const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
-                    buttons.forEach(button => {
-                        button.classList.add('compact-tab-button');
-                    });
-                });
-                
-                observer.observe(document.body, { childList: true, subtree: true });
-                
-                // Also apply immediately in case elements already exist
-                const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
-                buttons.forEach(button => {
-                    button.classList.add('compact-tab-button');
-                });
-            </script>
-            """, unsafe_allow_html=True)
-            
-# Close the tab container
             # Display content based on selected tab
             if st.session_state.selected_tab == "Charts":
                 st.info("Interactive price charts will be available soon! 📊")
@@ -409,8 +327,4 @@ if selected_stock:
         st.session_state.selected_stock = current_data.iloc[0]['Symbol']
         st.rerun()
 else:
-    st.markdown("""
-        <div style='text-align: center; padding: 50px; color: #666; font-family: Inter, sans-serif;'>
-            👈 Select a stock from the sidebar to view its dashboard
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="empty-dashboard-message">👈 Select a stock from the sidebar to view its dashboard</div>', unsafe_allow_html=True)

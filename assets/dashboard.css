@@ -236,3 +236,110 @@ button[data-testid="baseButton-secondary"]:not(.stSidebar button) {
     border: 1px solid rgba(147, 112, 219, 0.2) !important;
     color: #e0e0e0 !important;
 }
+
+/* Additional styles moved from app.py */
+/* App container spacing adjustments */
+.block-container {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+    padding-left: 0rem;
+    padding-right: 0rem;
+}
+
+/* Sidebar styling */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
+    padding-top: 0rem;
+}
+
+.main > div {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+[data-testid="stSidebarNav"] {
+    padding-top: 0rem;
+}
+
+[data-testid="collapsedControl"] {
+    display: none
+}
+
+/* Hide default elements */
+#MainMenu {display: none;}
+footer {display: none;}
+
+/* Reduce gap between sidebar and main content */
+[data-testid="stSidebarContent"] {
+    gap: 0rem;
+}
+
+/* Price display styles */
+.modern-dashboard-header {
+    position: relative;
+}
+
+.price-display {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-align: right;
+}
+
+.price-label {
+    font-size: 1rem;
+    opacity: 0.7;
+    display: block;
+    font-weight: 400;
+}
+
+.trend-up {
+    color: #4CAF50; /* Green for uptrend */
+}
+
+.trend-down {
+    color: #F44336; /* Red for downtrend */
+}
+
+.trend-neutral {
+    color: #FFC107; /* Amber for neutral/no trend */
+}
+
+/* Compact tab button styles */
+[data-testid="stHorizontalBlock"] {
+    gap: 0.5rem !important;
+}
+
+.compact-tab-button {
+    padding: 0.3rem !important;
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+    font-size: 0.9rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Style for the button container */
+.tab-button-container {
+    padding: 0rem 0.25rem !important;
+}
+
+/* No results styling */
+.no-results-message {
+    text-align: center;
+    padding: 20px;
+    color: #808080;
+    font-family: Inter, sans-serif;
+}
+
+/* Empty dashboard message */
+.empty-dashboard-message {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+    font-family: Inter, sans-serif;
+}
