@@ -6,6 +6,26 @@ import streamlit.components.v1 as components
 import yfinance as yf
 import time
 from datetime import datetime, timedelta
+from components.Charts import display_charts
+from components.Reports import display_reports
+from components.Forecast import display_forecast
+from components.News import display_news
+
+# Must be the first Streamlit command
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+
+# Add this CSS before any other content
+st.markdown("""
+<style>
+.timeframe-button {
+    padding: 0.3rem !important;
+    font-size: 0.8rem !important;
+    min-height: 0px !important;
+    height: auto !important;
+    margin: 0 2px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Read the CSV files
 nifty50_data = pd.read_csv('details_50.csv')
@@ -24,6 +44,19 @@ if 'price_cache' not in st.session_state:
 # Add previous stock tracking to detect changes
 if 'previous_stock' not in st.session_state:
     st.session_state.previous_stock = None
+
+# Get the query params and set the active tab
+if "tab" in st.query_params:
+    tab_param = st.query_params["tab"].lower()  # Convert to lowercase for consistency
+    # Map lowercase URL param to proper case for session state
+    tab_mapping = {
+        "charts": "Charts",
+        "reports": "Reports",
+        "forecast": "Forecast",
+        "news": "News"
+    }
+    if tab_param in tab_mapping:
+        st.session_state.selected_tab = tab_mapping[tab_param]
 
 # Function to get stock price with caching and trend calculation
 def get_stock_price_with_trend(symbol):
@@ -85,9 +118,6 @@ def get_stock_price_with_trend(symbol):
             'trend': "neutral",
             'timestamp': current_time
         }
-
-# Configure the page to use full width and remove padding
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
 # Load external CSS
 with open('assets/styles.css') as f:
@@ -246,6 +276,7 @@ if selected_stock:
             # Enhanced header with modern styling, badges, and price display
             st.markdown(f"""
                 <div class="modern-dashboard-header">
+                    <h1 class="gradient-header">{stock_info['Company Name']}</h1>
                     <div class="badge-container">
                         <div class="stock-badge purple-glow">
                             <div class="badge-content">
@@ -258,7 +289,6 @@ if selected_stock:
                             </div>
                         </div>
                     </div>
-                    <h1 class="gradient-header">{stock_info['Company Name']}</h1>
                     <div class="price-display {trend_class}">
                         <span class="price-label">Current Price</span>
                         {price_display}
@@ -287,6 +317,8 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "Charts" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "Charts"
+                    # Update query parameters and rerun
+                    st.query_params["tab"] = "charts"
                     st.rerun()
                     
             with col2:
@@ -294,6 +326,8 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "Reports" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "Reports"
+                    # Update query parameters and rerun
+                    st.query_params["tab"] = "reports"
                     st.rerun()
                     
             with col3:
@@ -301,6 +335,8 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "Forecast" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "Forecast"
+                    # Update query parameters and rerun
+                    st.query_params["tab"] = "forecast"
                     st.rerun()
                     
             with col4:
@@ -308,17 +344,22 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "News" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "News"
+                    # Update query parameters and rerun
+                    st.query_params["tab"] = "news"
                     st.rerun()
             
+            # Update query params based on selected tab
+            st.query_params["tab"] = st.session_state.selected_tab.lower()
+
             # Display content based on selected tab
             if st.session_state.selected_tab == "Charts":
-                st.info("Interactive price charts will be available soon! 📊")
+                display_charts(selected_stock)
             elif st.session_state.selected_tab == "Reports":
-                st.info("Financial reports and analysis coming soon! 📊")
+                display_reports(selected_stock)
             elif st.session_state.selected_tab == "Forecast":
-                st.info("AI-powered price predictions coming soon! 🔮")
+                display_forecast(selected_stock)
             else:  # News tab
-                st.info("Latest market news and updates coming soon! 📰")
+                display_news(selected_stock)
             
             st.markdown('</div>', unsafe_allow_html=True)
             
