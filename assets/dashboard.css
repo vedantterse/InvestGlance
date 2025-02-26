@@ -6,23 +6,11 @@
     display: none !important;
 }
 
-/* Remove space above dashboard header */
-.main .block-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-.main .block-container > div:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
 /* Modern Dashboard Header */
 .modern-dashboard-header {
     background: linear-gradient(135deg, #13131f 0%, #1e1e3a 100%);
     padding: 2rem;
     border-radius: 16px;
-    margin-top: 0;
     margin-bottom: 1.5rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(147, 112, 219, 0.15);

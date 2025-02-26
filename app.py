@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.graph_objects as go
 from streamlit_extras.app_logo import add_logo
 import streamlit.components.v1 as components
+import yfinance as yf
+import time
+from datetime import datetime, timedelta
 
 # Read the CSV files
 nifty50_data = pd.read_csv('details_50.csv')
@@ -15,6 +18,73 @@ if 'selected_market' not in st.session_state:
     st.session_state.selected_market = "NIFTY50"
 if 'selected_tab' not in st.session_state:  # Add this initialization
     st.session_state.selected_tab = "Charts"
+# Add price cache to session state
+if 'price_cache' not in st.session_state:
+    st.session_state.price_cache = {}
+# Add previous stock tracking to detect changes
+if 'previous_stock' not in st.session_state:
+    st.session_state.previous_stock = None
+
+# Function to get stock price with caching and trend calculation
+def get_stock_price_with_trend(symbol):
+    current_time = time.time()
+    cache_expiry = 60 * 60  # Cache for 1 hour to save API calls
+    
+    # Check cache first
+    if symbol in st.session_state.price_cache:
+        cached_data = st.session_state.price_cache[symbol]
+        if (current_time - cached_data['timestamp']) < cache_expiry:
+            return cached_data
+    
+    try:
+        # Use yfinance to get 5 days of data (to ensure we have at least 3 trading days)
+        ticker_symbol = f"{symbol}.NS"
+        ticker_data = yf.Ticker(ticker_symbol)
+        hist = ticker_data.history(period="5d")
+        
+        if (hist.empty):
+            return {
+                'price': "N/A",
+                'trend': "neutral",
+                'timestamp': current_time
+            }
+        
+        # Get the latest closing price (most recent day)
+        latest_price = hist['Close'].iloc[-1]
+        
+        # Calculate 3-day average (excluding the latest day)
+        if len(hist) >= 4:  # We need at least 4 days to have 3 previous days
+            three_day_avg = hist['Close'].iloc[-4:-1].mean()  # Last 3 days excluding today
+        elif len(hist) >= 2:  # If we have at least 2 days
+            three_day_avg = hist['Close'].iloc[:-1].mean()  # All previous days excluding today
+        else:
+            three_day_avg = latest_price  # Fallback if we only have today
+        
+        # Determine trend
+        if latest_price > three_day_avg:
+            trend = "up"
+        elif latest_price < three_day_avg:
+            trend = "down"
+        else:
+            trend = "neutral"
+        
+        # Cache the result
+        result = {
+            'price': latest_price,
+            'trend': trend,
+            'timestamp': current_time
+        }
+        st.session_state.price_cache[symbol] = result
+        
+        return result
+        
+    except Exception as e:
+        # In case of error, return N/A
+        return {
+            'price': "N/A",
+            'trend': "neutral",
+            'timestamp': current_time
+        }
 
 # Configure the page to use full width and remove padding
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
@@ -54,6 +124,52 @@ st.markdown("""
         [data-testid="stSidebarContent"] {
             gap: 0rem;
         }
+        /* Price display styles */
+        .modern-dashboard-header {
+            position: relative;
+        }
+        .price-display {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            text-align: right;
+        }
+        .price-label {
+            font-size: 1rem;
+            opacity: 0.7;
+            display: block;
+            font-weight: 400;
+        }
+        .trend-up {
+            color: #4CAF50; /* Green for uptrend */
+        }
+        .trend-down {
+            color: #F44336; /* Red for downtrend */
+        }
+        .trend-neutral {
+            color: #FFC107; /* Amber for neutral/no trend */
+        }
+        /* Compact tab button styles */
+        [data-testid="stHorizontalBlock"] {
+            gap: 0.5rem !important;
+        }
+        .compact-tab-button {
+            padding: 0.3rem !important;
+            min-height: 0 !important;
+            height: auto !important;
+            line-height: 1.2 !important;
+            font-size: 0.9rem !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+        /* Style for the button container */
+        .tab-button-container {
+            padding: 0rem 0.25rem !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -68,13 +184,21 @@ next50_selected = st.session_state.selected_market == "NEXT50"
 if col1.button("NIFTY50", type="secondary" if nifty50_selected else "primary", key="nifty50_btn"):
     st.session_state.selected_market = "NIFTY50"
     # Set default stock to first stock in NIFTY50
-    st.session_state.selected_stock = nifty50_data.iloc[0]['Symbol'] if not nifty50_data.empty else None
+    new_stock = nifty50_data.iloc[0]['Symbol'] if not nifty50_data.empty else None
+    # If stock changes, reset tab to Charts
+    if st.session_state.selected_stock != new_stock:
+        st.session_state.selected_tab = "Charts"
+    st.session_state.selected_stock = new_stock
     st.rerun()
 
 if col2.button("NEXT50", type="secondary" if next50_selected else "primary", key="next50_btn"):
     st.session_state.selected_market = "NEXT50"
     # Set default stock to first stock in NEXT50
-    st.session_state.selected_stock = next50_data.iloc[0]['Symbol'] if not next50_data.empty else None
+    new_stock = next50_data.iloc[0]['Symbol'] if not next50_data.empty else None
+    # If stock changes, reset tab to Charts
+    if st.session_state.selected_stock != new_stock:
+        st.session_state.selected_tab = "Charts"
+    st.session_state.selected_stock = new_stock
     st.rerun()
 
 # Add spacing after buttons
@@ -95,6 +219,9 @@ def create_stock_card(container, row, symbol):
         use_container_width=True,
         type=button_type  # Use secondary type for selected stock
     ):
+        # If selecting a different stock, reset tab to Charts
+        if st.session_state.selected_stock != symbol:
+            st.session_state.selected_tab = "Charts"
         st.session_state.selected_stock = symbol
         st.rerun()
 
@@ -143,6 +270,15 @@ if st.session_state.selected_stock:
 if st.session_state.selected_stock is None and not current_data.empty:
     st.session_state.selected_stock = current_data.iloc[0]['Symbol']
 
+# Before displaying the dashboard, check if stock has changed
+# This handles direct URL access or session resumption cases
+if st.session_state.selected_stock and st.session_state.previous_stock != st.session_state.selected_stock:
+    # If the stock has changed since last render, reset the tab
+    if st.session_state.previous_stock is not None:
+        st.session_state.selected_tab = "Charts"
+    # Update the previous stock
+    st.session_state.previous_stock = st.session_state.selected_stock
+
 # Add dashboard display with improved badges and direct tab buttons
 selected_stock = st.session_state.get('selected_stock')
 if selected_stock:
@@ -156,7 +292,18 @@ if selected_stock:
         else:
             stock_info = stock_data.iloc[0]
             
-            # Enhanced header with modern styling and badges directly at the top
+            # Fetch price data only once when stock is selected, with 1-hour cache
+            price_data = get_stock_price_with_trend(selected_stock)
+            
+            # Format price display based on data
+            if isinstance(price_data['price'], (int, float)):
+                price_display = f"₹{price_data['price']:,.2f}"
+                trend_class = f"trend-{price_data['trend']}"
+            else:
+                price_display = "Not Available"
+                trend_class = "trend-neutral"
+            
+            # Enhanced header with modern styling, badges, and price display
             st.markdown(f"""
                 <div class="modern-dashboard-header">
                     <div class="badge-container">
@@ -172,6 +319,10 @@ if selected_stock:
                         </div>
                     </div>
                     <h1 class="gradient-header">{stock_info['Company Name']}</h1>
+                    <div class="price-display {trend_class}">
+                        <span class="price-label">Current Price</span>
+                        {price_display}
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -186,30 +337,59 @@ if selected_stock:
                 "News": "📰"
             }
             
-            # Create the tab buttons
+            # Apply custom CSS to make columns more compact
+            for i, col in enumerate([col1, col2, col3, col4]):
+                col.markdown('<div class="tab-button-container"></div>', unsafe_allow_html=True)
+            
+            # Create the tab buttons with icons inline with text
             with col1:
-                if st.button(f"{tab_data['Charts']}\nCharts", key="tab_Charts", 
-                           type="secondary" if st.session_state.selected_tab == "Charts" else "primary"):
+                if st.button(f"{tab_data['Charts']} Charts", key="tab_Charts", 
+                           type="secondary" if st.session_state.selected_tab == "Charts" else "primary",
+                           use_container_width=True):
                     st.session_state.selected_tab = "Charts"
                     st.rerun()
                     
             with col2:
-                if st.button(f"{tab_data['Reports']}\nReports", key="tab_Reports",
-                           type="secondary" if st.session_state.selected_tab == "Reports" else "primary"):
+                if st.button(f"{tab_data['Reports']} Reports", key="tab_Reports",
+                           type="secondary" if st.session_state.selected_tab == "Reports" else "primary",
+                           use_container_width=True):
                     st.session_state.selected_tab = "Reports"
                     st.rerun()
                     
             with col3:
-                if st.button(f"{tab_data['Forecast']}\nForecast", key="tab_Forecast",
-                           type="secondary" if st.session_state.selected_tab == "Forecast" else "primary"):
+                if st.button(f"{tab_data['Forecast']} Forecast", key="tab_Forecast",
+                           type="secondary" if st.session_state.selected_tab == "Forecast" else "primary",
+                           use_container_width=True):
                     st.session_state.selected_tab = "Forecast"
                     st.rerun()
                     
             with col4:
-                if st.button(f"{tab_data['News']}\nNews", key="tab_News",
-                           type="secondary" if st.session_state.selected_tab == "News" else "primary"):
+                if st.button(f"{tab_data['News']} News", key="tab_News",
+                           type="secondary" if st.session_state.selected_tab == "News" else "primary",
+                           use_container_width=True):
                     st.session_state.selected_tab = "News"
                     st.rerun()
+            
+            # Add JavaScript to adjust button styles after rendering
+            st.markdown("""
+            <script>
+                // Use mutation observer to apply styles to buttons after they're rendered
+                const observer = new MutationObserver(() => {
+                    const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
+                    buttons.forEach(button => {
+                        button.classList.add('compact-tab-button');
+                    });
+                });
+                
+                observer.observe(document.body, { childList: true, subtree: true });
+                
+                // Also apply immediately in case elements already exist
+                const buttons = document.querySelectorAll('[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"]');
+                buttons.forEach(button => {
+                    button.classList.add('compact-tab-button');
+                });
+            </script>
+            """, unsafe_allow_html=True)
             
 # Close the tab container
             # Display content based on selected tab
