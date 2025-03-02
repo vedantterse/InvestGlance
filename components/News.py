@@ -5,18 +5,48 @@ import pandas as pd
 import urllib.parse
 import time
 import os
+import toml
 
-# API key for NewsAPI
-NEWSAPI_KEY = "0c407fb8c127459da2f04a5682190681"
+# API key initialization (without using st functions directly)
+def load_api_key():
+    """Load API key from various locations without using st functions"""
+    # Try to load from .streamlit/secrets.toml (recommended)
+    try:
+        # First try official path
+        if os.path.exists('.streamlit/secrets.toml'):
+            with open('.streamlit/secrets.toml', 'r') as f:
+                return toml.load(f)["api_keys"]["newsapi"]
+        # Then try alternate path with absolute directory
+        streamlit_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.streamlit')
+        if os.path.exists(os.path.join(streamlit_dir, 'secrets.toml')):
+            with open(os.path.join(streamlit_dir, 'secrets.toml'), 'r') as f:
+                return toml.load(f)["api_keys"]["newsapi"]
+        # Fallback to .secrets.toml
+        if os.path.exists('.secrets.toml'):
+            with open('.secrets.toml', 'r') as f:
+                return toml.load(f)["api_keys"]["newsapi"]
+    except Exception:
+        pass
+    return None
+
+# Initialize API key at module level (no st functions)
+NEWSAPI_KEY = load_api_key()
 
 def fetch_news_for_stock(symbol, company_name=None):
-    """
-    Fetch news articles using NewsAPI with simple session state caching
-    """
+    """Fetch news articles using NewsAPI with simple session state caching"""
+    # Check if API key is available - use st functions here since this runs during app execution
+    if not NEWSAPI_KEY:
+        # Try to get from Streamlit secrets as a fallback during runtime
+        try:
+            newsapi_key = st.secrets["api_keys"]["newsapi"]
+        except:
+            st.error("NewsAPI key not found. News functionality is disabled.")
+            return []
+    else:
+        newsapi_key = NEWSAPI_KEY
+    
     # Basic cache key
     cache_key = f"news_cache_{symbol}"
-    
-    # Simple cache expiry - 2 hours for all stocks
     cache_expiry = 2 * 60 * 60
     current_time = time.time()
     
@@ -28,14 +58,7 @@ def fetch_news_for_stock(symbol, company_name=None):
     
     # If cache missed, fetch fresh data
     all_articles = []
-    
-    # Basic search queries
-    simple_queries = [
-        symbol,
-        f"{symbol} stock"
-    ]
-    
-    # Add company name if available
+    simple_queries = [symbol, f"{symbol} stock"]
     if company_name:
         simple_queries.append(company_name)
     
@@ -44,19 +67,13 @@ def fetch_news_for_stock(symbol, company_name=None):
     for query in simple_queries:
         try:
             encoded_query = urllib.parse.quote(query)
-            url = f"https://newsapi.org/v2/everything?q={encoded_query}&apiKey={NEWSAPI_KEY}&pageSize=10"
+            url = f"https://newsapi.org/v2/everything?q={encoded_query}&apiKey={newsapi_key}&pageSize=10"
             
-            headers = {
-                'User-Agent': 'Mozilla/5.0'
-            }
-            
-            response = requests.get(url, headers=headers)
-            
+            response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
             if response.status_code != 200:
                 continue
                 
             data = response.json()
-            
             if data.get('status') != "ok":
                 continue
             
@@ -74,12 +91,9 @@ def fetch_news_for_stock(symbol, company_name=None):
                         'image': article.get('urlToImage', '')
                     })
             
-            # If we found enough articles, don't try more queries
             if len(all_articles) >= 5:
                 break
-                
         except Exception:
-            # Silently continue on errors
             continue
     
     # Update session cache
@@ -134,29 +148,33 @@ def parse_date(date_str):
     return datetime.now() - timedelta(days=365)
 
 def display_news(symbol):
-    """
-    Display latest news for the selected stock in a visually appealing format
-    """    
+    """Display latest news for the selected stock"""   
     try:
-        # Load external CSS for news styling
         css_path = 'assets/news.css'
         if os.path.exists(css_path):
             with open(css_path) as f:
                 st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except Exception:
-        pass  # CSS failing shouldn't block the news display
+        pass
     
-    # Display news header
     st.markdown(f"""
     <div class="news-header">
         <h2>Latest News for {symbol}</h2>
     </div>
     """, unsafe_allow_html=True)
     
-    # Get company name for better search results
-    company_name = get_company_name_from_symbol(symbol)
+    # Check if API key is available
+    if not NEWSAPI_KEY and 'api_keys' not in st.secrets:
+        st.error("NewsAPI key not found. Please configure it in .streamlit/secrets.toml")
+        st.markdown("""
+        <div class="no-news-container">
+            <h3>News feature is disabled</h3>
+            <p>API key configuration is missing.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        return
     
-    # Fetch news articles with simple caching
+    company_name = get_company_name_from_symbol(symbol)
     news_articles = fetch_news_for_stock(symbol, company_name)
     
     if not news_articles:
@@ -168,18 +186,16 @@ def display_news(symbol):
         """, unsafe_allow_html=True)
         return
     
-    # Sort articles by date (descending order - newest first)
+    # Sort articles by date
     one_year_ago = datetime.now() - timedelta(days=365)
-    
     filtered_articles = []
+    
     for article in news_articles:
         try:
             pub_date = parse_date(article.get('publishedAt', ''))
-            # Wide date range filter
             if pub_date >= one_year_ago:
                 filtered_articles.append(article)
         except:
-            # Include articles with unparseable dates
             filtered_articles.append(article)
     
     sorted_articles = sorted(
@@ -188,18 +204,18 @@ def display_news(symbol):
         reverse=True
     )
     
-    # Display summary of news sources
-    st.markdown(f"""<div class="news-count">Showing {len(sorted_articles)} news articles for {symbol}</div>""", unsafe_allow_html=True)
+    # Display news count
+    st.markdown(f"""<div class="news-count">Showing {len(sorted_articles)} news articles</div>""", unsafe_allow_html=True)
     
-    # Display news articles in modern, compact cards with smaller images
+    # Display news articles
     st.markdown('<div class="news-container">', unsafe_allow_html=True)
+    
     for article in sorted_articles:
-        # Format the date for display
+        # Format date
         try:
             published_date = parse_date(article.get('publishedAt', ''))
             date_display = published_date.strftime("%d %b %Y")
             
-            # Calculate days ago for better context
             days_ago = (datetime.now() - published_date).days
             if days_ago == 0:
                 time_ago = "Today"
@@ -212,12 +228,12 @@ def display_news(symbol):
         except:
             date_display = "Unknown date"
         
-        # Image handling with placeholder for missing images - FIXED INDENTATION HERE
+        # Image handling
         image_url = article.get('image', '')
         if not image_url:
             image_url = "https://via.placeholder.com/120x120/2a2a3d/c8d8f7?text=No+Image"
             
-        # Create a compact news card with smaller image
+        # Create news card
         st.markdown(
             f"""
             <div class="news-card">
@@ -238,10 +254,4 @@ def display_news(symbol):
             unsafe_allow_html=True,
         )
     st.markdown('</div>', unsafe_allow_html=True)
-
-    # Show a note about the data sources with dark theme footer
-    st.markdown("""
-    <div class="news-footer">
-        News data powered by <a href="https://newsapi.org/" target="_blank">NewsAPI</a>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="news-footer">News data powered by NewsAPI</div>""", unsafe_allow_html=True)
