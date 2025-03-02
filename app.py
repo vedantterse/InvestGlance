@@ -1,18 +1,21 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
-from streamlit_extras.app_logo import add_logo
-import streamlit.components.v1 as components
+
 import yfinance as yf
 import time
-from datetime import datetime, timedelta
+
 from components.Charts import display_charts
 from components.Reports import display_reports
 from components.Forecast import display_forecast
 from components.News import display_news
 
 # Must be the first Streamlit command
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    layout="wide", 
+    initial_sidebar_state="expanded",
+    page_title="InvestGlance",
+    page_icon="assets/1.png"
+)
 
 # Add this CSS before any other content
 st.markdown("""
