@@ -1,0 +1,161 @@
+/* Modern Dark Theme News Cards */
+.news-container {
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+
+.news-card {
+    background-color: #1e1e2e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.25s ease;
+    margin-bottom: 20px;
+    border: 1px solid #2a2a3d;
+    display: flex;
+    flex-direction: row;
+}
+
+.news-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.news-img-container {
+    flex: 0 0 120px;
+    height: 120px;
+    overflow: hidden;
+}
+
+.news-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.news-content {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #e2e2e2;
+    line-height: 1.4;
+}
+
+.news-meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    color: #a0a0a0;
+}
+
+.news-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background-color: #2d4263;
+    color: #c8d8f7;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.news-description {
+    color: #c0c0c0;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    flex-grow: 1;
+}
+
+.news-read-more {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(90deg, #845EC2, #5F7DF2);
+    color: white !important;
+    text-decoration: none !important;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    align-self: flex-start;
+    transition: all 0.2s ease;
+}
+
+.news-read-more:hover {
+    box-shadow: 0 0 12px rgba(95, 125, 242, 0.5);
+}
+
+.news-header {
+    margin-bottom: 20px;
+}
+
+.news-header h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #c8d8f7;
+}
+
+.news-count {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    margin-bottom: 15px;
+}
+
+.news-footer {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #2a2a3d;
+}
+
+.no-news-container {
+    background-color: #1e1e2e;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    border: 1px solid #2a2a3d;
+}
+
+.no-news-container h3 {
+    font-family: 'Inter', sans-serif;
+    color: #c8d8f7;
+    margin-bottom: 10px;
+}
+
+.no-news-container p {
+    color: #a0a0a0;
+}
+
+/* Fix any text color issues with dark theme */
+.news-container p, 
+.news-container h1, 
+.news-container h2, 
+.news-container h3, 
+.news-container h4, 
+.news-container h5 {
+    color: #e2e2e2;
+}
+
+.news-container a {
+    color: #5F7DF2;
+}
+
+/* Make the "Read Full Article" button more compact */
+.news-read-more {
+    text-align: center;
+    white-space: nowrap;
+}
