@@ -12,7 +12,12 @@ def display_comparison(symbol):
     with open('assets/comparison.css') as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     
-    st.markdown(f"<h2>Industry Peer Comparison for {symbol}</h2>", unsafe_allow_html=True)
+    # More professional, short and modern heading
+    st.markdown(f"""
+        <div class="comparison-header">
+            <h2>{symbol} <span class="comparison-subtitle">Peer Analysis</span></h2>
+        </div>
+    """, unsafe_allow_html=True)
     
     try:
         # Load both stock lists
