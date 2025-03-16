@@ -6,7 +6,7 @@ import time
 
 from components.Charts import display_charts
 from components.Reports import display_reports
-from components.Forecast import display_forecast
+from components.Comparison import display_comparison
 from components.News import display_news
 
 # Must be the first Streamlit command
@@ -39,7 +39,7 @@ if 'selected_stock' not in st.session_state:
     st.session_state.selected_stock = None
 if 'selected_market' not in st.session_state:
     st.session_state.selected_market = "NIFTY50"
-if 'selected_tab' not in st.session_state:  # Add this initialization
+if 'selected_tab' not in st.session_state:
     st.session_state.selected_tab = "Charts"
 # Add price cache to session state
 if 'price_cache' not in st.session_state:
@@ -48,6 +48,26 @@ if 'price_cache' not in st.session_state:
 if 'previous_stock' not in st.session_state:
     st.session_state.previous_stock = None
 
+# Function to update the URL based on selected stock and tab
+def update_permalink_url():
+    symbol = st.session_state.selected_stock
+    tab = st.session_state.selected_tab.lower() if st.session_state.selected_tab else "charts"
+    
+    # Update query parameters
+    st.query_params["stock"] = symbol
+    st.query_params["tab"] = tab
+
+# Check if there's a stock symbol in the URL
+if "stock" in st.query_params:
+    url_symbol = st.query_params["stock"]
+    # Verify the symbol exists in our data before setting it
+    if url_symbol in nifty50_data['Symbol'].values:
+        st.session_state.selected_stock = url_symbol
+        st.session_state.selected_market = "NIFTY50"
+    elif url_symbol in next50_data['Symbol'].values:
+        st.session_state.selected_stock = url_symbol
+        st.session_state.selected_market = "NEXT50"
+
 # Get the query params and set the active tab
 if "tab" in st.query_params:
     tab_param = st.query_params["tab"].lower()  # Convert to lowercase for consistency
@@ -55,7 +75,7 @@ if "tab" in st.query_params:
     tab_mapping = {
         "charts": "Charts",
         "reports": "Reports",
-        "forecast": "Forecast",
+        "comparison": "Comparison",
         "news": "News"
     }
     if tab_param in tab_mapping:
@@ -166,6 +186,7 @@ if col1.button("NIFTY50", type="secondary" if nifty50_selected else "primary", k
     if st.session_state.selected_stock != new_stock:
         st.session_state.selected_tab = "Charts"
     st.session_state.selected_stock = new_stock
+    update_permalink_url()
     st.rerun()
 
 if col2.button("NEXT50", type="secondary" if next50_selected else "primary", key="next50_btn"):
@@ -176,6 +197,7 @@ if col2.button("NEXT50", type="secondary" if next50_selected else "primary", key
     if st.session_state.selected_stock != new_stock:
         st.session_state.selected_tab = "Charts"
     st.session_state.selected_stock = new_stock
+    update_permalink_url()
     st.rerun()
 
 # Add spacing after buttons
@@ -200,6 +222,7 @@ def create_stock_card(container, row, symbol):
         if st.session_state.selected_stock != symbol:
             st.session_state.selected_tab = "Charts"
         st.session_state.selected_stock = symbol
+        update_permalink_url()
         st.rerun()
 
 def display_stocks(data, search_query):
@@ -306,7 +329,7 @@ if selected_stock:
             tab_data = {
                 "Charts": "📈",
                 "Reports": "📊", 
-                "Forecast": "🔮",
+                "Comparison": "🔄",
                 "News": "📰"
             }
             
@@ -320,8 +343,8 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "Charts" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "Charts"
-                    # Update query parameters and rerun
-                    st.query_params["tab"] = "charts"
+                    # Update permalink URL and rerun
+                    update_permalink_url()
                     st.rerun()
                     
             with col2:
@@ -329,17 +352,17 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "Reports" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "Reports"
-                    # Update query parameters and rerun
-                    st.query_params["tab"] = "reports"
+                    # Update permalink URL and rerun
+                    update_permalink_url()
                     st.rerun()
                     
             with col3:
-                if st.button(f"{tab_data['Forecast']} Forecast", key="tab_Forecast",
-                           type="secondary" if st.session_state.selected_tab == "Forecast" else "primary",
+                if st.button(f"{tab_data['Comparison']} Comparison", key="tab_Comparison",
+                           type="secondary" if st.session_state.selected_tab == "Comparison" else "primary",
                            use_container_width=True):
-                    st.session_state.selected_tab = "Forecast"
-                    # Update query parameters and rerun
-                    st.query_params["tab"] = "forecast"
+                    st.session_state.selected_tab = "Comparison"
+                    # Update permalink URL and rerun
+                    update_permalink_url()
                     st.rerun()
                     
             with col4:
@@ -347,20 +370,20 @@ if selected_stock:
                            type="secondary" if st.session_state.selected_tab == "News" else "primary",
                            use_container_width=True):
                     st.session_state.selected_tab = "News"
-                    # Update query parameters and rerun
-                    st.query_params["tab"] = "news"
+                    # Update permalink URL and rerun
+                    update_permalink_url()
                     st.rerun()
-            
-            # Update query params based on selected tab
-            st.query_params["tab"] = st.session_state.selected_tab.lower()
+
+            # Update URL to reflect current state
+            update_permalink_url()
 
             # Display content based on selected tab
             if st.session_state.selected_tab == "Charts":
                 display_charts(selected_stock)
             elif st.session_state.selected_tab == "Reports":
                 display_reports(selected_stock)
-            elif st.session_state.selected_tab == "Forecast":
-                display_forecast(selected_stock)
+            elif st.session_state.selected_tab == "Comparison":
+                display_comparison(selected_stock)
             else:  # News tab
                 display_news(selected_stock)
             
