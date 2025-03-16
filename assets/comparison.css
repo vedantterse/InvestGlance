@@ -1,0 +1,153 @@
+/* Better container */
+.comparison-wrapper {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+/* Container for each peer tube */
+.peer-tube-container {
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+/* Last tube container to avoid extra space */
+.peer-tube-container:last-child {
+    margin-bottom: 0;
+}
+
+/* Modern tube design with rounder corners */
+.peer-tube {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(45,45,45,0.8), rgba(35,35,35,0.9));
+    border-radius: 14px;  /* Rounder corners */
+    height: 80px;  /* Taller for better visibility */
+    padding: 0 22px;  /* More padding */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Enhanced hover effect */
+.peer-tube:hover {
+    transform: translateX(5px);
+    background: linear-gradient(90deg, rgba(55,55,55,0.85), rgba(40,40,40,0.95));
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+/* Selected state with stronger highlight */
+.peer-tube.selected {
+    border-left: 5px solid #4ECDC4;
+    background: linear-gradient(90deg, rgba(78,205,196,0.15), rgba(35,35,35,0.9));
+}
+
+/* Larger and more prominent index circle */
+.peer-index {
+    width: 36px;  /* Larger */
+    height: 36px;  /* Larger */
+    border-radius: 50%;
+    background-color: rgba(78,205,196,0.2);
+    color: #4ECDC4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 18px;
+    font-size: 1.1rem;  /* Larger font */
+    flex-shrink: 0;
+}
+
+/* Company name container */
+.peer-name-container {
+    flex-grow: 1;
+    margin-right: 18px;
+    width: 45%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Larger company name */
+.peer-name {
+    font-weight: 600;
+    color: white;
+    font-size: 1.25rem;  /* Larger font */
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Larger symbol text */
+.peer-symbol {
+    color: #BBB;
+    font-size: 1rem;  /* Larger font */
+}
+
+/* Price information container with more space */
+.price-info {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-left: 20px;
+    min-width: 240px;  /* Wider */
+    text-align: right;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    height: 60%;
+}
+
+/* Larger price text */
+.peer-price {
+    font-size: 1.3rem;  /* Larger font */
+    font-weight: 600;
+    margin-right: 20px;  /* More spacing */
+    min-width: 120px;  /* Wider */
+    text-align: right;
+}
+
+/* Better styled change indicator */
+.peer-change {
+    font-size: 1.1rem;  /* Larger font */
+    padding: 5px 12px;  /* More padding */
+    border-radius: 8px;  /* Rounder corners */
+    min-width: 90px;  /* Wider */
+    text-align: center;
+}
+
+/* Fresh modern color indicators */
+.price-trend-up {
+    color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.12);
+}
+
+.price-trend-down {
+    color: #F44336;
+    background-color: rgba(244, 67, 54, 0.12);
+}
+
+.price-trend-neutral {
+    color: #B0B0B0;
+    background-color: rgba(176, 176, 176, 0.12);
+}
+
+/* Modern industry header with unique amber/gold color scheme */
+.industry-header {
+    background: linear-gradient(90deg, rgba(255, 193, 7, 0.15), rgba(80, 60, 20, 0.25));
+    padding: 18px 24px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    border-left: 5px solid #FFC107;  /* Amber/gold color */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.industry-title {
+    margin: 0;
+    color: #FFD54F;  /* Light amber text */
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
