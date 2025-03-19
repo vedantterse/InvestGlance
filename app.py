@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide", 
     initial_sidebar_state="expanded",
     page_title="InvestGlance",
-    page_icon="assets/1.png"
+    page_icon="assets/favicon.png"
 )
 
 # Add this CSS before any other content
