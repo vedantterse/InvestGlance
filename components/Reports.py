@@ -648,6 +648,7 @@ def display_reports(symbol):
                                                 textinfo='label+percent',
                                                 textposition='inside',
                                                 insidetextorientation='radial',
+                                                textfont=dict(color='white', size=12),  # Ensuring all text is white
                                                 marker=dict(
                                                     colors=[colors[cat] for cat in sorted_categories],
                                                     line=dict(color='#1F1F1F', width=2)
