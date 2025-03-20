@@ -1,3 +1,4 @@
+# THIS FILE IS FOR FETCHING THE HISTORICAL DATA IN CSV. 
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
