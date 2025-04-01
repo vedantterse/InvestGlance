@@ -130,13 +130,19 @@ def analyze_peers_with_gemini(symbols, industry):
             # Get price data
             ticker_symbol = f"{symbol}.NS"
             ticker = yf.Ticker(ticker_symbol)
-            hist = ticker.history(period="3mo")  # Get 3 months of data
+            hist = ticker.history(period="4mo")  # Get 4 months of data for quarterly comparison
             
             if (hist.empty):
                 continue
                 
             # Get latest price
             latest_price = hist['Close'].iloc[-1]
+            
+            # Calculate quarterly price change (approximately 63 trading days)
+            quarterly_price_change = None
+            if len(hist) >= 63:
+                price_3m_ago = hist['Close'].iloc[-63]
+                quarterly_price_change = ((latest_price - price_3m_ago) / price_3m_ago) * 100
             
             # Calculate trend
             sma20 = hist['Close'].rolling(window=20).mean().iloc[-1] if len(hist) > 20 else None
@@ -149,13 +155,6 @@ def analyze_peers_with_gemini(symbols, industry):
                 avg_price = hist['Close'].iloc[-10:].mean() if len(hist) > 10 else hist['Close'].mean()
                 trend = "up" if latest_price > avg_price else "down"
                 
-            # Calculate percent change
-            percent_change = 0.0
-            if len(hist) >= 2:
-                prev_close = hist['Close'].iloc[-2]
-                if prev_close > 0:
-                    percent_change = ((latest_price - prev_close) / prev_close) * 100
-            
             # Save technical data
             peer_data[symbol]["technical"] = {
                 "latest_price": latest_price,
@@ -170,7 +169,7 @@ def analyze_peers_with_gemini(symbols, industry):
             peer_data[symbol]["price_data"] = {
                 "price": latest_price,
                 "trend": trend,
-                "percent_change": percent_change
+                "percent_change": quarterly_price_change if quarterly_price_change is not None else 0.0
             }
             
             # 2. Get fundamental data using Reports.py functions
@@ -610,26 +609,51 @@ def display_ranked_peers(peers, peer_insights):
         while len(insights) < 3:
             insights.append("")
         
-        # Get price info
-        price = peer['price'] if 'price' in peer and not pd.isna(peer['price']) else 'N/A'
-        trend = peer['trend'] if 'trend' in peer and not pd.isna(peer['trend']) else 'neutral'
-        percent_change = peer['percent_change'] if 'percent_change' in peer and not pd.isna(peer['percent_change']) else 0.0
+        # Calculate quarterly growth for color logic
+        latest_price = None
+        quarterly_price_change = None
         
+        try:
+            # Use yfinance to get 4 months of data for quarterly comparison
+            ticker_symbol = f"{symbol}.NS"
+            ticker = yf.Ticker(ticker_symbol)
+            hist = ticker.history(period="4mo")  # Get 4 months of data to ensure full quarter
+            
+            if not hist.empty:
+                # Get latest price
+                latest_price = hist['Close'].iloc[-1]
+                
+                # Get price from approximately 3 months ago (quarterly comparison)
+                # About 63 trading days in 3 months
+                if len(hist) >= 63:
+                    price_3m_ago = hist['Close'].iloc[-63]
+                    quarterly_price_change = ((latest_price - price_3m_ago) / price_3m_ago) * 100
+        except Exception as e:
+            st.warning(f"Couldn't fetch historical data for quarterly price change: {e}")
+            quarterly_price_change = None
+
+        # Get price info - prioritize using our calculated quarterly change
+        price = peer['price'] if 'price' in peer and not pd.isna(peer['price']) else 'N/A'
+        percent_change = quarterly_price_change if quarterly_price_change is not None else peer['percent_change']
+
         # Format price display
         if isinstance(price, (int, float)):
             price_display = f"₹{price:,.2f}"
-            percent_display = f"{percent_change:.2f}%"
+            percent_display = f"{percent_change:.2f}%" if percent_change is not None else "--"
         else:
             price_display = "Not Available"
             percent_display = "--"
-        
-        # Set trend class and indicator
-        trend_class = f"price-trend-{trend}"
-        if trend == 'up' and isinstance(price, (int, float)):
+
+        # Set trend class and indicator based on quarterly price change
+        if percent_change is not None and percent_change > 0:
+            trend_class = "price-trend-up"
             percent_display = f"▲ {percent_display}"
-        elif trend == 'down' and isinstance(price, (int, float)):
+        elif percent_change is not None and percent_change < 0:
+            trend_class = "price-trend-down"
             percent_display = f"▼ {percent_display}"
-        
+        else:
+            trend_class = "price-trend-neutral"
+
         # Set selected class
         selected_class = " selected" if peer['Is_Selected'] else ""
         
