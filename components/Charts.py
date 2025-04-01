@@ -29,11 +29,15 @@ def display_charts(symbol):
     # We'll filter to the selected timeframe later
     try:
         with st.spinner(f"Loading {symbol} data..."):
-            # For short timeframes, we need less data
+            # Determine the period to fetch based on selected timeframe
             if st.session_state.selected_timeframe in ["1wk", "1mo"]:
                 fetch_period = "6mo"  # Enough data for short timeframes
-            else:
-                fetch_period = "1y"   # More data for longer timeframes
+            elif st.session_state.selected_timeframe in ["3mo", "6mo", "1y"]:
+                fetch_period = "1y"   # More data for medium timeframes
+            elif st.session_state.selected_timeframe == "3y":
+                fetch_period = "3y"   # Fetch 3 years of data
+            else:  # 5y
+                fetch_period = "5y"   # Fetch 5 years of data
                 
             ticker = yf.Ticker(ticker_symbol)
             hist = ticker.history(period=fetch_period)
@@ -59,7 +63,12 @@ def display_charts(symbol):
                 hist = hist.iloc[-180:]
             elif st.session_state.selected_timeframe == "1y":
                 hist = hist.iloc[-365:]
-            # For 3y and 5y keep original data since we fetched 1y max
+            elif st.session_state.selected_timeframe == "3y":
+                # Keep all data for 3y (we fetched exactly 3y)
+                pass
+            elif st.session_state.selected_timeframe == "5y":
+                # Keep all data for 5y (we fetched exactly 5y)
+                pass
             
             # Create chart figure
             fig = go.Figure()
